@@ -1,0 +1,91 @@
+aws ec2 create-launch-template \
+    --launch-template-name LnchTmplt \
+    --version-description Initialversion \
+    --launch-template-data "$(cat D:/MyLaunchTemplate.json)" \
+    --no-verify-ssl
+	
+	
+aws ec2 describe-subnets --filters Name=vpc-id,Values=vpc-0a05d9aae86a7ee3d \
+--no-verify-ssl
+
+ վերցնել   SubnetId
+    {
+            "AvailabilityZone": "us-east-1a",
+            "AvailabilityZoneId": "use1-az4",
+            "AvailableIpAddressCount": 4091,
+            "CidrBlock": "172.31.16.0/20",
+            "DefaultForAz": true,
+            "MapPublicIpOnLaunch": true,
+            "MapCustomerOwnedIpOnLaunch": false,
+            "State": "available",
+            "SubnetId": "subnet-03c68c466b4a4b462",
+            "VpcId": "vpc-0a05d9aae86a7ee3d",
+            "OwnerId": "533267087022",
+            "AssignIpv6AddressOnCreation": false,
+            "Ipv6CidrBlockAssociationSet": [],
+            "SubnetArn": "arn:aws:ec2:us-east-1:533267087022:subnet/subnet-03c68c466b4a4b462",
+            "EnableDns64": false,
+            "Ipv6Native": false,
+            "PrivateDnsNameOptionsOnLaunch": {
+                "HostnameType": "ip-name",
+                "EnableResourceNameDnsARecord": false,
+                "EnableResourceNameDnsAAAARecord": false
+            }
+
+
+
+aws autoscaling create-auto-scaling-group \
+  --auto-scaling-group-name scgroup \
+  --launch-template LaunchTemplateName=LnchTmplt \
+  --min-size 1 \
+  --desired-capacity 1 \
+  --max-size 3 \
+  --vpc-zone-identifier subnet-03c68c466b4a4b462 \
+  --no-verify-ssl
+  
+  
+  
+  
+  aws elbv2 create-load-balancer --name my-alb --subnets  subnet-03c68c466b4a4b462 
+  
+  aws elbv2 create-target-group \
+  --name MyTargetGroup \
+  --protocol HTTP \
+  --port 80 \
+  --vpc-id vpc-06035df9339c2607b \
+  --no-verify-ssl
+  
+  
+ 
+  
+  aws elbv2 create-load-balancer \
+  --name  LdBlncr \
+  --subnets subnet-03c68c466b4a4b462 subnet-0b3605d858a557f94\
+  --security-groups sg-0504eee7cc85e244c \
+  --no-verify-ssl
+  
+  
+  
+  aws elbv2 create-target-group \
+  --name TrgtGrp \
+  --protocol HTTP \
+  --port 80 \
+  --vpc-id vpc-0a05d9aae86a7ee3d \
+  --no-verify-ssl
+  
+  
+  
+  
+  
+  aws rds create-db-instance \
+    --db-instance-identifier MysqlDb \
+    --db-instance-class db.t2.micro \
+    --engine mysql \
+    --engine-version 5.7.30 \
+    --allocated-storage 5 \
+    --db-subnet-group-name my-db-subnet-group \
+    --no-publicly-accessible \
+    --db-name test_database \
+    --master-username mes88 \
+    --master-user-password 123456 \
+    --no-verify-ssl
