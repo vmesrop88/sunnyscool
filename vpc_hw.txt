@@ -1,0 +1,270 @@
+aws ec2 create-vpc --cidr-block 10.0.0.0/16 --no-verify-ssl
+
+——————————————————————————————
+----------vpc-id իմանալու համար
+ 
+aws ec2 describe-vpcs  --no-verify-ssl
+
+
+{
+    "Vpcs": [
+        {
+            "CidrBlock": "172.31.0.0/16",
+            "DhcpOptionsId": "dopt-07208a8c25cc4b68e",
+            "State": "available",
+            "VpcId": "vpc-0a05d9aae86a7ee3d",
+            "OwnerId": "533267087022",
+            "InstanceTenancy": "default",
+            "CidrBlockAssociationSet": [
+                {
+                    "AssociationId": "vpc-cidr-assoc-07b87ce7d22e9b809",
+                    "CidrBlock": "172.31.0.0/16",
+                    "CidrBlockState": {
+                        "State": "associated"
+                    }
+                }
+            ],
+            "IsDefault": true
+        },
+        {
+            "CidrBlock": "10.0.0.0/16",
+            "DhcpOptionsId": "dopt-07208a8c25cc4b68e",
+            "State": "available",
+            "VpcId": "vpc-03c232eb61eb5875a",
+            "OwnerId": "533267087022",
+            "InstanceTenancy": "default",
+            "CidrBlockAssociationSet": [
+                {
+                    "AssociationId": "vpc-cidr-assoc-0e72505eabd747359",
+                    "CidrBlock": "10.0.0.0/16",
+                    "CidrBlockState": {
+                        "State": "associated"
+                    }
+                }
+            ],
+            "IsDefault": false
+        }
+    ]
+}
+
+——————————————————————————————————
+
+aws ec2 create-subnet --vpc-id vpc-03c232eb61eb5875a --cidr-block 10.0.1.0/24  --no-verify-ssl
+
+————————————————————————————————————
+
+aws ec2 create-subnet --vpc-id vpc-03c232eb61eb5875a --cidr-block 10.0.2.0/24  --no-verify-ssl
+———————————————————————————————————————
+
+
+aws ec2 create-internet-gateway  --no-verify-ssl
+
+
+—————————————————————————————————————————
+ --------------InternetGatewayId  ստանալ 
+
+aws ec2 describe-internet-gateways  --no-verify-ssl
+
+
+{
+    "InternetGateways": [
+        {
+            "Attachments": [],
+            "InternetGatewayId": "igw-07b99aebab435e90d",
+            "OwnerId": "533267087022",
+            "Tags": []
+        }
+    ]
+}
+
+
+
+———————————————————————————————
+
+aws ec2 attach-internet-gateway --vpc-id vpc-03c232eb61eb5875a --internet-gateway-id igw-07b99aebab435e90d  --no-verify-ssl
+
+
+
+__________________________________
+
+aws ec2 create-route-table --vpc-id vpc-03c232eb61eb5875a  --no-verify-ssl
+
+ {
+    "RouteTable": {
+        "Associations": [],
+        "PropagatingVgws": [],
+        "RouteTableId": "rtb-0001b45e226d1bbbd",
+        "Routes": [
+            {
+                "DestinationCidrBlock": "10.0.0.0/16",
+                "GatewayId": "local",
+                "Origin": "CreateRouteTable",
+                "State": "active"
+            }
+        ],
+        "Tags": [],
+        "VpcId": "vpc-03c232eb61eb5875a",
+        "OwnerId": "533267087022"
+    },
+    "ClientToken": "859d73b4-6d26-4fbd-ba44-9ffd2df834a6"
+}
+
+________________________________________
+
+aws ec2 create-route --route-table-id rtb-0001b45e226d1bbbd  --destination-cidr-block 0.0.0.0/0 --gateway-id igw-07b99aebab435e90d --no-verify-ssl
+
+———————————————subnet-id   իմանալ———————————————
+
+aws ec2 describe-subnets --no-verify-ssl
+
+ 
+
+{
+    "Subnets": [
+        {
+            "AvailabilityZone": "us-east-1d",
+            "AvailabilityZoneId": "use1-az2",
+            "AvailableIpAddressCount": 251,
+            "CidrBlock": "10.0.1.0/24",
+            "DefaultForAz": false,
+            "MapPublicIpOnLaunch": false,
+            "MapCustomerOwnedIpOnLaunch": false,
+            "State": "available",
+            "SubnetId": "subnet-0a48eaff4108c2a33",
+            "VpcId": "vpc-03c232eb61eb5875a",
+            "OwnerId": "533267087022",
+            "AssignIpv6AddressOnCreation": false,
+            "Ipv6CidrBlockAssociationSet": [],
+            "SubnetArn": "arn:aws:ec2:us-east-1:533267087022:subnet/subnet-0a48eaff4108c2a33",
+            "EnableDns64": false,
+            "Ipv6Native": false,
+            "PrivateDnsNameOptionsOnLaunch": {
+                "HostnameType": "ip-name",
+                "EnableResourceNameDnsARecord": false,
+                "EnableResourceNameDnsAAAARecord": false
+            }
+        },
+        {
+            "AvailabilityZone": "us-east-1d",
+            "AvailabilityZoneId": "use1-az2",
+            "AvailableIpAddressCount": 251,
+            "CidrBlock": "10.0.2.0/24",
+            "DefaultForAz": false,
+            "MapPublicIpOnLaunch": false,
+            "MapCustomerOwnedIpOnLaunch": false,
+            "State": "available",
+            "SubnetId": "subnet-0d9c7769519971a20",
+            "VpcId": "vpc-03c232eb61eb5875a",
+            "OwnerId": "533267087022",
+            "AssignIpv6AddressOnCreation": false,
+            "Ipv6CidrBlockAssociationSet": [],
+            "SubnetArn": "arn:aws:ec2:us-east-1:533267087022:subnet/subnet-0d9c7769519971a20",
+            "EnableDns64": false,
+            "Ipv6Native": false,
+            "PrivateDnsNameOptionsOnLaunch": {
+                "HostnameType": "ip-name",
+                "EnableResourceNameDnsARecord": false,
+                "EnableResourceNameDnsAAAARecord": false
+            }
+        }
+    ]
+}
+
+
+—————————————————————
+
+aws ec2 associate-route-table --subnet-id subnet-0a48eaff4108c2a33 --route-table-id rtb-0001b45e226d1bbbd --no-verify-ssl
+
+————————————————————————————
+
+------------IP -----------
+
+?????  aws ec2 modify-subnet-attribute --subnet-id subnet-0a48eaff4108c2a33 --map-public-ip-on-launch  --no-verify-ssl
+
+aws ec2 allocate-address --domain vpc  --no-verify-ssl
+
+aws ec2 describe-addresses  --no-verify-ssl
+
+{
+    "Addresses": [
+        {
+            "PublicIp": "44.199.154.137",
+            "AllocationId": "eipalloc-0a41bd363157013c7",
+            "Domain": "vpc",
+            "PublicIpv4Pool": "amazon",
+            "NetworkBorderGroup": "us-east-1"
+        }
+    ]
+}
+
+-----------------------------------------------------
+
+
+aws ec2 create-nat-gateway --subnet-id subnet-0a48eaff4108c2a33  --allocation-id eipalloc-0a41bd363157013c7 --no-verify-ssl
+
+{
+    "ClientToken": "9c545e9c-88bb-4977-b492-b72dfb843141",
+    "NatGateway": {
+        "CreateTime": "2024-03-04T12:41:34+00:00",
+        "NatGatewayAddresses": [
+            {
+                "AllocationId": "eipalloc-0a41bd363157013c7",
+                "IsPrimary": true,
+                "Status": "associating"
+            }
+        ],
+        "NatGatewayId": "nat-04abb2612a652282e",
+        "State": "pending",
+        "SubnetId": "subnet-0a48eaff4108c2a33",
+        "VpcId": "vpc-03c232eb61eb5875a",
+        "ConnectivityType": "public"
+    }
+}
+
+
+
+
+________route-table_______ private subnet ____
+
+aws ec2 create-route-table --vpc-id vpc-03c232eb61eb5875a  --no-verify-ssl
+
+
+
+{
+    "RouteTable": {
+        "Associations": [],
+        "PropagatingVgws": [],
+        "RouteTableId": "rtb-07860d3b697498ee0",
+        "Routes": [
+            {
+                "DestinationCidrBlock": "10.0.0.0/16",
+                "GatewayId": "local",
+                "Origin": "CreateRouteTable",
+                "State": "active"
+            }
+        ],
+        "Tags": [],
+        "VpcId": "vpc-03c232eb61eb5875a",
+        "OwnerId": "533267087022"
+    },
+    "ClientToken": "b8af8bf9-d3fe-4a27-a73a-e23ab56d7152"
+}
+
+
+__________________________________________
+
+aws ec2 create-route --route-table-id rtb-07860d3b697498ee0  --destination-cidr-block 0.0.0.0/0 --nat-gateway-id nat-04abb2612a652282e  --no-verify-ssl
+
+
+
+
+
+aws ec2 associate-route-table --subnet-id subnet-0d9c7769519971a20 --route-table-id rtb-07860d3b697498ee0  --no-verify-ssl
+
+
+
+ 
+
+ 
+
+
