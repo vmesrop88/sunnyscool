@@ -1,0 +1,171 @@
+  aws dynamodb create-table \
+      --table-name TstTbl \
+      --attribute-definitions AttributeName=ID,AttributeType=S \
+      --key-schema AttributeName=ID,KeyType=HASH \
+      --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
+  	--no-verify-ssl
+	
+  	
+#{
+#    "TableDescription": {
+#        "AttributeDefinitions": [
+#            {
+#                "AttributeName": "ID",
+#                "AttributeType": "S"
+#            }
+#        ],
+#        "TableName": "TstTbl",
+#        "KeySchema": [
+#            {
+#                "AttributeName": "ID",
+#                "KeyType": "HASH"
+#            }
+#        ],
+#        "TableStatus": "CREATING",
+#        "CreationDateTime": "2024-03-15T09:53:44.956000+04:00",
+#        "ProvisionedThroughput": {
+#            "NumberOfDecreasesToday": 0,
+#            "ReadCapacityUnits": 5,
+#            "WriteCapacityUnits": 5
+#        },
+#        "TableSizeBytes": 0,
+#        "ItemCount": 0,
+#        "TableArn": "arn:aws:dynamodb:us-east-1:533267087022:table/TstTbl",
+#        "TableId": "c784bf5d-1246-49ab-a5f9-64a92e159a28",
+#        "DeletionProtectionEnabled": false
+#    }
+#}
+
+#______________________
+
+zip -r lambda_function.zip  D:/lambda_function.py 
+
+# ACCOUNT_ID
+
+aws sts get-caller-identity	 --no-verify-ssl
+
+
+#________________________________________
+
+aws iam create-role \
+    --role-name lambda-role \
+    --assume-role-policy-document '{
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Principal": {
+                    "Service": "lambda.amazonaws.com"
+                },
+                "Action": "sts:AssumeRole"
+            }
+        ]
+    }' --no-verify-ssl
+
+
+
+aws iam attach-role-policy \
+    --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole \
+    --role-name lambda-role --no-verify-ssl
+
+#__________________________________________
+aws lambda create-function \
+    --function-name MyFunction \
+    --runtime python3.8 \
+    --role arn:aws:iam::533267087022:role/lambda-role \
+    --handler lambda_function.lambda_handler \
+    --zip-file fileb://lambda_function.zip  --no-verify-ssl 	
+    
+
+ 
+{
+    "FunctionName": "MyFunction",
+    "FunctionArn": "arn:aws:lambda:us-east-1:533267087022:function:MyFunction",
+    "Runtime": "python3.8",
+    "Role": "arn:aws:iam::533267087022:role/lambda-role",
+    "Handler": "lambda_function.lambda_handler",
+    "CodeSize": 373,
+    "Description": "",
+    "Timeout": 3,
+    "MemorySize": 128,
+    "LastModified": "2024-03-15T06:41:17.444+0000",
+    "CodeSha256": "stNrqf45HaPzj1U++ewtWENx10i7coeRuvgL6KGydVM=",
+    "Version": "$LATEST",
+    "TracingConfig": {
+        "Mode": "PassThrough"
+    },
+    "RevisionId": "ec0e89da-d0ac-4e92-982c-141a6e4f1195",
+    "State": "Pending",
+    "StateReason": "The function is being created.",
+    "StateReasonCode": "Creating",
+    "PackageType": "Zip",
+    "Architectures": [
+        "x86_64"
+    ],
+    "EphemeralStorage": {
+        "Size": 512
+    },
+    "SnapStart": {
+        "ApplyOn": "None",
+        "OptimizationStatus": "Off"
+    },
+    "RuntimeVersionConfig": {
+        "RuntimeVersionArn": "arn:aws:lambda:us-east-1::runtime:b20481443932830049531ab20faaf09295061aff7a67a0b0f40496e5e1ddec59"
+    },
+    "LoggingConfig": {
+        "LogFormat": "Text",
+        "LogGroup": "/aws/lambda/MyFunction"
+    }
+}
+
+
+______________________________________________________
+
+aws apigateway create-rest-api --name TstApi  --no-verify-ssl
+
+{
+    "id": "isl2yusj92",
+    "name": "TstApi",
+    "createdDate": "2024-03-15T10:46:32+04:00",
+    "apiKeySource": "HEADER",
+    "endpointConfiguration": {
+        "types": [
+            "EDGE"
+        ]
+    },
+    "disableExecuteApiEndpoint": false,
+    "rootResourceId": "h5bippkbmj"
+}
+
+______________________________________________________________________
+
+ 
+aws apigateway create-resource \
+    --rest-api-id isl2yusj92 \
+    --parent-id h5bippkbmj \
+    --path-part hello \
+    --no-verify-ssl
+
+ 
+
+aws apigateway put-method \
+    --rest-api-id isl2yusj92 \
+    --resource-id h5bippkbmj \
+    --http-method POST \
+    --authorization-type NONE \
+    --api-key-required \
+	--no-verify-ssl
+	
+	aws apigateway put-integration \
+    --rest-api-id isl2yusj92 \
+    --resource-id h5bippkbmj \
+    --http-method POST \
+    --type AWS_PROXY \
+    --integration-http-method POST \
+    --uri arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:533267087022:function:HelloWorldFunction/invocations  \
+    --no-verify-ssl
+	
+	aws apigateway create-deployment \
+    --rest-api-id isl2yusj92 \
+    --stage-name prod \
+    --no-verify-ssl
